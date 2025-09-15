@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  apiKey    String?
+  createdAt DateTime @default(now())
+
+  users     User[]
+  customers Customer[]
+  products  Product[]
+  orders    Order[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  customers Customer[]
+}
+
+model Customer {
+  id                   String   @id @default(uuid())
+  tenantId             String
+  userId               String?
+  created_at           DateTime
+  updated_at           DateTime
+  first_name           String?
+  last_name            String?
+  email                String   @unique
+  phone                String?
+  state                String?
+  note                 String?
+  verified_email       Boolean
+  tax_exempt           Boolean
+  currency             String?
+  admin_graphql_api_id String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id])
+
+  addresses Address[]
+  orders    Order[]
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  customer_id   String
+  first_name    String?
+  last_name     String?
+  company       String?
+  address1      String?
+  address2      String?
+  city          String?
+  province      String?
+  country       String?
+  zip           String?
+  phone         String?
+  name          String?
+  province_code String?
+  country_code  String?
+  country_name  String?
+  is_default    Boolean
+
+  customer Customer @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id                     String   @id @default(uuid())
+  tenantId               String
+  admin_graphql_api_id   String   @unique
+  title                  String
+  body_html              String?
+  vendor                 String?
+  product_type           String?
+  handle                 String?
+  status                 String?
+  tags                   String?
+  published_scope        String?
+  created_at             DateTime?
+  updated_at             DateTime?
+  published_at           DateTime?
+  has_variants_that_requires_components Boolean
+  category               String?
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  variants Variant[]
+}
+
+model Variant {
+  id                   String   @id @default(uuid())
+  admin_graphql_api_id String   @unique
+  product_id           String
+  title                String
+  price                Decimal
+  compare_at_price     Decimal?
+  position             Int?
+  sku                  String?
+  taxable              Boolean
+  option1              String?
+  option2              String?
+  option3              String?
+  inventory_policy     String?
+  inventory_quantity   Int?
+  old_inventory_quantity Int?
+  created_at           DateTime?
+  updated_at           DateTime?
+
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id                   String   @id @default(uuid())
+  shopify_id           String   @unique
+  tenantId             String
+  customer_id          String?
+  admin_graphql_api_id String?
+  email                String?
+  name                 String?
+  note                 String?
+  currency             String?
+  financial_status     String?
+  fulfillment_status   String?
+  order_number         Int?
+  order_status_url     String?
+  processed_at         DateTime?
+  cancelled_at         DateTime?
+  created_at           DateTime
+  updated_at           DateTime
+  tags                 String?
+  total_price          Decimal?
+  subtotal_price       Decimal?
+  total_tax            Decimal?
+  total_discounts      Decimal?
+  source_name          String?
+  confirmed            Boolean
+  buyer_accepts_marketing Boolean
+  test                 Boolean
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customer_id], references: [id], onDelete: SetNull)
+
+  line_items     LineItem[]
+  shipping_lines ShippingLine[]
+  addresses      OrderAddress[]
+}
+
+model LineItem {
+  id                   String   @id @default(uuid())
+  order_id             String
+  admin_graphql_api_id String?
+  title                String?
+  name                 String?
+  sku                  String?
+  quantity             Int
+  price                Decimal
+  grams                Int?
+  product_id           String?
+  taxable              Boolean
+  fulfillment_service  String?
+  gift_card            Boolean
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}
+
+model ShippingLine {
+  id       String @id @default(uuid())
+  order_id String
+  title    String?
+  price    Decimal
+  source   String?
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}
+
+model OrderAddress {
+  id            String   @id @default(uuid())
+  order_id      String
+  type          String   // "billing" or "shipping"
+  first_name    String?
+  last_name     String?
+  company       String?
+  address1      String?
+  address2      String?
+  city          String?
+  province      String?
+  country       String?
+  zip           String?
+  phone         String?
+  name          String?
+  province_code String?
+  country_code  String?
+  country_name  String?
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}
+
