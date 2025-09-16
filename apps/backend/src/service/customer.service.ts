@@ -1,6 +1,6 @@
 import prisma from "@repo/db"
 
-async function createCustomer(shopifyCustomer: any, tenantId: string) {
+export async function createCustomer(shopifyCustomer: any, tenantId: string) {
   return prisma.customer.create({
     data: {
       tenantId,
@@ -43,4 +43,10 @@ async function createCustomer(shopifyCustomer: any, tenantId: string) {
   })
 }
 
-export { createCustomer }
+export async function getCustomers() {
+  return prisma.customer.findMany({
+    include: {
+      addresses: true,
+    },
+  })
+}
