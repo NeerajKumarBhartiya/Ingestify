@@ -1,0 +1,6 @@
+[build]
+  publish = "apps/web/dist"
+  command = "pnpm install --filter ./apps/web... && pnpm --filter ./apps/web... run build"
+
+[functions]
+  directory = "netlify/functions"

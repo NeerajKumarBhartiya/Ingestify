@@ -125,6 +125,7 @@ pnpm exec turbo link
 
 ## Useful Links
 
+
 Learn more about the power of Turborepo:
 
 - [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
@@ -133,3 +134,37 @@ Learn more about the power of Turborepo:
 - [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
 - [Configuration Options](https://turborepo.com/docs/reference/configuration)
 - [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+
+---
+
+## Deploying the Web App to Netlify
+
+To deploy the Vite-based web app (`apps/web`) to Netlify:
+
+1. **Build the app locally (optional):**
+	```sh
+	cd apps/web
+	pnpm install
+	pnpm run build
+	```
+
+2. **Netlify configuration:**
+	- The `netlify.toml` file is preconfigured:
+	  - `build.command`: `pnpm install --filter ./apps/web... && pnpm --filter ./apps/web... run build`
+	  - `build.publish`: `apps/web/dist`
+	- The `_redirects` file in `apps/web/public` ensures SPA routing works correctly.
+
+3. **Deploy steps:**
+	- Push your repository to GitHub/GitLab/Bitbucket.
+	- Connect your repo to Netlify.
+	- Set the build command to `pnpm install --filter ./apps/web... && pnpm --filter ./apps/web... run build` (or just `pnpm --filter ./apps/web... run build` if dependencies are already installed).
+	- Set the publish directory to `apps/web/dist`.
+
+4. **Environment:**
+	- Make sure Node.js 18+ and pnpm are available in the Netlify build environment.
+	- If you use environment variables, add them in the Netlify dashboard.
+
+5. **Result:**
+	- Your Vite React app will be live on Netlify with proper SPA routing.
+
+---
